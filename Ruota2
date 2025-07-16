@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruota della Fortuna</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background: #f9f9f9;
+      font-family: 'Comic Sans MS', cursive;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 300px;
+      height: 300px;
+    }
+
+    svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(0deg);
+      transition: transform 4s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    .arrow {
+      position: absolute;
+      bottom: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 30px solid black;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ruota della Fortuna</h1>
+  <div class="wheel-container">
+    <svg id="wheel" viewBox="0 0 100 100">
+      <!-- Spicchi -->
+      <g>
+        <path d="M50,50 L50,0 A50,50 0 0,1 97.55,15.45 z" fill="#FF0000"/>
+        <path d="M50,50 L97.55,15.45 A50,50 0 0,1 80.90,47.55 z" fill="#FFD700"/>
+        <path d="M50,50 L80.90,47.55 A50,50 0 0,1 50,100 z" fill="#808080"/>
+        <path d="M50,50 L50,100 A50,50 0 0,1 19.10,47.55 z" fill="#00FF00"/>
+        <path d="M50,50 L19.10,47.55 A50,50 0 0,1 2.45,15.45 z" fill="#0000FF"/>
+        <path d="M50,50 L2.45,15.45 A50,50 0 0,1 50,0 z" fill="#800080"/>
+      </g>
+      <!-- Testi -->
+      <text x="75" y="25" font-size="5" transform="rotate(30 75 25)">10% di sconto</text>
+      <text x="85" y="50" font-size="5" transform="rotate(90 85 50)">15% di sconto</text>
+      <text x="60" y="85" font-size="5" transform="rotate(150 60 85)">Questa volta non hai vinto</text>
+      <text x="25" y="85" font-size="5" transform="rotate(210 25 85)">20% di sconto</text>
+      <text x="10" y="50" font-size="5" transform="rotate(270 10 50)">Questa volta non hai vinto</text>
+      <text x="25" y="25" font-size="5" transform="rotate(330 25 25)">10% di sconto</text>
+    </svg>
+    <div class="arrow"></div>
+  </div>
+  <button id="spin">Gira la ruota</button>
+  <div id="result">Risultato: </div>
+
+  <script>
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spin');
+    const result = document.getElementById('result');
+
+    const prizes = [
+      "10% di sconto",
+      "15% di sconto",
+      "Questa volta non hai vinto",
+      "20% di sconto",
+      "Questa volta non hai vinto",
+      "10% di sconto"
+    ];
+
+    let deg = 0;
+
+    spinBtn.addEventListener('click', () => {
+      spinBtn.disabled = true;
+      const spins = Math.floor(Math.random() * 5) + 5; // giri interi
+      const extra = Math.floor(Math.random() * 360);   // gradi extra
+      deg = deg + spins * 360 + extra;
+
+      wheel.style.transform = `rotate(${deg}deg)`;
+
+      setTimeout(() => {
+        const actualDeg = deg % 360;
+        const slice = 360 / prizes.length;
+        const index = Math.floor((360 - actualDeg) / slice) % prizes.length;
+        result.textContent = "Risultato: " + prizes[index];
+        spinBtn.disabled = false;
+      }, 4000);
+    });
+  </script>
+</body>
+</html>
