@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruota della Fortuna</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Comic Sans MS', cursive;
+    }
+
+    #wheel-container {
+      position: relative;
+      width: 90vw;
+      max-width: 400px;
+      margin: 30px auto;
+    }
+
+    #wheel {
+      width: 100%;
+      height: auto;
+      border: 5px solid #333;
+      border-radius: 50%;
+    }
+
+    #arrow {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ruota della Fortuna</h1>
+  <div id="wheel-container">
+    <canvas id="wheel" width="500" height="500"></canvas>
+    <div id="arrow"></div>
+  </div>
+  <button id="spin">Gira la Ruota</button>
+  <p id="result"></p>
+
+  <script>
+    const canvas = document.getElementById('wheel');
+    const ctx = canvas.getContext('2d');
+    let size = canvas.width;
+
+    const segments = [
+      { label: '10% di sconto', color: '#f44336' },
+      { label: '10% di sconto', color: '#ff9800' },
+      { label: 'Questa volta non hai vinto', color: '#9c27b0' },
+      { label: '15% di sconto', color: '#2196f3' },
+      { label: '20% di sconto', color: '#4caf50' },
+      { label: 'Questa volta non hai vinto', color: '#ffeb3b' },
+    ];
+
+    let angle = 0;
+    const spinButton = document.getElementById('spin');
+    const result = document.getElementById('result');
+    let spinning = false;
+
+    function drawWheel() {
+      ctx.clearRect(0, 0, size, size);
+      const numSegments = segments.length;
+      const arcSize = (2 * Math.PI) / numSegments;
+
+      for (let i = 0; i < numSegments; i++) {
+        const startAngle = angle + i * arcSize;
+        const endAngle = startAngle + arcSize;
+
+        ctx.beginPath();
+        ctx.moveTo(size / 2, size / 2);
+        ctx.arc(size / 2, size / 2, size / 2, startAngle, endAngle);
+        ctx.fillStyle = segments[i].color;
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(size / 2, size / 2);
+        ctx.rotate(startAngle + arcSize / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 14px Arial';
+        ctx.fillText(segments[i].label, size / 2 - 10, 0);
+        ctx.restore();
+      }
+    }
+
+    function spinWheel() {
+      if (spinning) return;
+      spinning = true;
+      spinButton.disabled = true;
+
+      let spinAngle = Math.random() * 360 + 720; // 2 giri completi + random
+      let spinTime = 4000; // 4 secondi
+
+      const start = performance.now();
+
+      function animate(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / spinTime, 1);
+        const ease = 1 - Math.pow(1 - progress, 3);
+
+        angle = (spinAngle * ease * Math.PI) / 180;
+        drawWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          spinning = false;
+          spinButton.disabled = true;
+          showResult();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function showResult() {
+      const degrees = (angle * 180) / Math.PI;
+      const adjusted = (360 - (degrees % 360)) % 360;
+
+      const arcSize = 360 / segments.length;
+      const index = Math.floor(adjusted / arcSize) % segments.length;
+
+      result.textContent = 'Hai vinto: ' + segments[index].label;
+    }
+
+    spinButton.addEventListener('click', spinWheel);
+
+    drawWheel();
+  </script>
+</body>
+</html>
