@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruota della Fortuna</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    #pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid #333;
+      margin-bottom: 20px;
+    }
+
+    #wheel {
+      position: relative;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 5px solid #333;
+      transition: transform 4s ease-out;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 18px;
+      background: #444;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .slice {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+    }
+  </style>
+</head>
+<body>
+  <h1>Ruota della Fortuna</h1>
+  <div id="pointer"></div>
+  <div id="wheel"></div>
+  <button id="spin">Gira la ruota</button>
+  <div id="result"></div>
+
+  <script>
+    const prizes = [
+      "10% di sconto",
+      "15% di sconto",
+      "Stavolta non hai vinto",
+      "10% di sconto",
+      "Stavolta non hai vinto",
+      "20% di sconto"
+    ];
+
+    const colors = ["#e74c3c", "#f1c40f", "#95a5a6", "#2ecc71", "#3498db", "#9b59b6"];
+
+    const wheel = document.getElementById('wheel');
+    const spinBtn = document.getElementById('spin');
+    const result = document.getElementById('result');
+
+    const slices = prizes.length;
+    const sliceDeg = 360 / slices;
+    let rotation = 0;
+
+    function createSlices() {
+      for (let i = 0; i < slices; i++) {
+        const slice = document.createElement('div');
+        slice.classList.add('slice');
+        slice.style.background = colors[i % colors.length];
+        slice.style.transform = `rotate(${i * sliceDeg}deg) skewY(${90 - sliceDeg}deg)`;
+        slice.innerHTML = `<div style="position: absolute; transform: skewY(-${90 - sliceDeg}deg) rotate(${sliceDeg / 2}deg); transform-origin: 0 0; color: #fff; padding: 5px;">${prizes[i]}</div>`;
+        wheel.appendChild(slice);
+      }
+    }
+
+    function spinWheel() {
+      if (localStorage.getItem('hasSpun')) {
+        alert('Hai già girato la ruota!');
+        return;
+      }
+
+      const randomSpin = Math.floor(Math.random() * 360) + 360 * 5;
+      rotation += randomSpin;
+      wheel.style.transform = `rotate(${rotation}deg)`;
+
+      const selectedSlice = slices - Math.floor((rotation % 360) / sliceDeg) - 1;
+      const prize = prizes[selectedSlice >= 0 ? selectedSlice : selectedSlice + slices];
+
+      setTimeout(() => {
+        result.textContent = `Risultato: ${prize}`;
+        localStorage.setItem('hasSpun', true);
+      }, 4000);
+    }
+
+    createSlices();
+    spinBtn.addEventListener('click', spinWheel);
+  </script>
+</body>
+</html>
