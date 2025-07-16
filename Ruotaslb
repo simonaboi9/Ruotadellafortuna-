@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruota della Fortuna</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      max-width: 90vw;
+    }
+    #spin {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ruota della Fortuna</h1>
+  <canvas id="wheel" width="500" height="500"></canvas>
+  <br />
+  <button id="spin">Gira la Ruota</button>
+  <div id="result"></div>
+
+  <script>
+    const options = [
+      "10% di sconto",
+      "15% di sconto",
+      "20% di sconto",
+      "Questa volta non hai vinto",
+      "Questa volta non hai vinto",
+      "10% di sconto"
+    ];
+
+    const colors = ["#f44336", "#2196F3", "#4CAF50", "#FFC107", "#9C27B0", "#FF5722"];
+
+    const canvas = document.getElementById("wheel");
+    const ctx = canvas.getContext("2d");
+    const spinBtn = document.getElementById("spin");
+    const result = document.getElementById("result");
+    const size = canvas.width / 2;
+    const numOptions = options.length;
+    const arcSize = (2 * Math.PI) / numOptions;
+    let angle = 0;
+    let spinning = false;
+
+    function drawWheel() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < numOptions; i++) {
+        const start = angle + i * arcSize;
+        const end = start + arcSize;
+        ctx.beginPath();
+        ctx.moveTo(size, size);
+        ctx.arc(size, size, size, start, end);
+        ctx.fillStyle = colors[i];
+        ctx.fill();
+        ctx.stroke();
+
+        // Testo
+        ctx.save();
+        ctx.translate(size, size);
+        ctx.rotate(start + arcSize / 2);
+        ctx.textAlign = "right";
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 16px sans-serif";
+        ctx.fillText(options[i], size - 10, 10);
+        ctx.restore();
+      }
+
+      // Freccia in alto
+      ctx.fillStyle = "red";
+      ctx.beginPath();
+      ctx.moveTo(size - 20, 0);
+      ctx.lineTo(size + 20, 0);
+      ctx.lineTo(size, 30);
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function spinWheel() {
+      if (spinning) return;
+
+      spinning = true;
+      spinBtn.disabled = true;
+      result.textContent = "";
+
+      let spinAngle = Math.random() * 360 + 360 * 5; // 5 giri + casuale
+      let spinTime = 5000; // 5 secondi
+      let start = null;
+
+      function animate(timestamp) {
+        if (!start) start = timestamp;
+        let progress = timestamp - start;
+        let rotation = easeOut(progress, 0, spinAngle, spinTime);
+        angle = (rotation * Math.PI) / 180;
+        drawWheel();
+        if (progress < spinTime) {
+          requestAnimationFrame(animate);
+        } else {
+          finishSpin();
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function easeOut(t, b, c, d) {
+      t /= d;
+      t--;
+      return c * (t * t * t + 1) + b;
+    }
+
+    function finishSpin() {
+      const degrees = (angle * 180) / Math.PI;
+      const normalized = (degrees + 90) % 360; // CORREZIONE: +90 perché la freccia è in alto
+      const index = Math.floor(numOptions - (normalized / 360) * numOptions) % numOptions;
+      result.textContent = "Hai vinto: " + options[index];
+    }
+
+    spinBtn.addEventListener("click", spinWheel);
+    drawWheel();
+  </script>
+</body>
+</html>
