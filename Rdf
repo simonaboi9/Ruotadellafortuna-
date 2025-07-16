@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ruota della Fortuna</title>
+  <style>
+    body {
+      text-align: center;
+      font-family: 'Comic Sans MS', cursive;
+    }
+    #wheel {
+      width: 90vmin;
+      height: 90vmin;
+      border-radius: 50%;
+      border: 8px solid #333;
+      position: relative;
+      overflow: hidden;
+    }
+    .slice {
+      width: 50%;
+      height: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background: red;
+      clip-path: polygon(0% 0%, 100% 0%, 0% 100%);
+    }
+    #arrow {
+      width: 0; 
+      height: 0; 
+      border-left: 30px solid transparent;
+      border-right: 30px solid transparent;
+      border-top: 40px solid red;
+      margin: 20px auto;
+      transform: rotate(180deg);
+    }
+    #spin {
+      margin: 20px;
+      padding: 10px 30px;
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Ruota della Fortuna</h1>
+  <div id="arrow"></div>
+  <div id="wheel"></div>
+  <button id="spin">Gira la Ruota</button>
+  <h2 id="result"></h2>
+
+  <script>
+    const prizes = [
+      { text: "10% di sconto", color: "red" },
+      { text: "15% di sconto", color: "blue" },
+      { text: "20% di sconto", color: "green" },
+      { text: "Questa volta non hai vinto", color: "yellow" },
+      { text: "10% di sconto", color: "orange" },
+      { text: "Questa volta non hai vinto", color: "purple" }
+    ];
+
+    const wheel = document.getElementById('wheel');
+    const result = document.getElementById('result');
+    const spinBtn = document.getElementById('spin');
+
+    const sliceDeg = 360 / prizes.length;
+
+    // Disegna le fette
+    prizes.forEach((prize, i) => {
+      const slice = document.createElement('div');
+      slice.className = 'slice';
+      slice.style.background = prize.color;
+      slice.style.transform = `rotate(${i * sliceDeg}deg) skewY(${90 - sliceDeg}deg)`;
+      slice.innerHTML = `<span style="
+        position: absolute;
+        transform: skewY(-${90 - sliceDeg}deg) rotate(${sliceDeg/2}deg);
+        transform-origin: left top;
+        color: white;
+        font-size: 1rem;
+        left: 0.5rem;
+      ">${prize.text}</span>`;
+      wheel.appendChild(slice);
+    });
+
+    let spinning = false;
+    spinBtn.addEventListener('click', () => {
+      if (spinning) return;
+      spinning = true;
+      spinBtn.disabled = true;
+
+      const randomSpin = Math.floor(3600 + Math.random() * 360);
+      wheel.style.transition = "transform 4s cubic-bezier(0.33, 1, 0.68, 1)";
+      wheel.style.transform = `rotate(${randomSpin}deg)`;
+
+      wheel.addEventListener('transitionend', () => {
+        const deg = randomSpin % 360;
+        const index = Math.floor(((360 - deg + sliceDeg/2) % 360) / sliceDeg);
+        result.textContent = `Hai vinto: ${prizes[index].text}`;
+      }, { once: true });
+    });
+  </script>
+</body>
+</html>
